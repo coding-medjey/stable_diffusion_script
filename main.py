@@ -16,13 +16,6 @@ def read_input():
 
 def load_pipeline(model):
     pipeline = AutoPipelineForText2Image.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16).to("cuda")
-    
-    # Load weights
-    pipeline.load_lora_weights(
-        "/home/",
-        weight_name="prav_r128_sdxl.safetensors",
-        adapter_name="man"
-    )
     return pipeline
 
 
