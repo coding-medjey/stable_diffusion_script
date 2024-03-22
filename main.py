@@ -6,7 +6,7 @@ import time
 import boto3
 import secrets
 from datetime import datetime
-from .settings import Settings 
+from settings import Settings 
 
 
 def read_input():
