@@ -3,6 +3,10 @@ import torch
 from PIL import Image
 from IPython.display import display
 import argparse
+import boto3
+from datetime import datetime
+import secrets
+from io import BytesIO  # Import BytesIO
 
 
 def read_input():
@@ -13,7 +17,6 @@ def read_input():
     return parser.parse_args()
 
 
-
 def load_pipeline(model):
     pipeline = AutoPipelineForText2Image.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16).to("cuda")
     return pipeline
@@ -21,17 +24,84 @@ def load_pipeline(model):
 
 def generate_image_from_prompt():
     # Initialize pipeline
-    request  = read_input()
+    request = read_input()
     pipeline = load_pipeline(request.model)
     images = pipeline(
-        prompt= request.prompt,
+        prompt=request.prompt,
         negative_prompt=request.negative_prompt,
         height=1024,
         width=1024
     ).images
 
     # Save and display image
-    images[0].save('/home/outputs.jpg')
+    images[0].save('/home/inference/outputs.jpg')
+
+    # Upload image to Cloudflare
+    job_id = uploadfile(images)
+    if job_id:
+          print("Image uploaded successfully to Cloudflare. Job ID:")
+          print(f"https://pub-b98e7fd0839f42c4bb6c36c680b13023.r2.dev/{job_id}/0")
+        
+    else:
+        print("Failed to upload image to Cloudflare.")
+        
+
+def list_object(prefix):
+    print("i m in listing ")
+    try:
+        s3_client = boto3.client(
+            service_name='s3',
+            endpoint_url="https://36be2b889dd21fc22f59d8342ea695fe.r2.cloudflarestorage.com/",
+            aws_access_key_id=CLOUDFLARE_AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=CLOUDFLARE_AWS_SECRET_ACCESS_KEY,
+            
+        )
+        res = s3_client.list_objects(Bucket="photostudio", Prefix=prefix)
+        print(res)
+         
+        urls = []
+   
+        for obj in res['Contents']:
+            print(obj, "obg")
+            file_name = obj['Key']
+            print(filename,"filename")
+            url = f"https://pub-b98e7fd0839f42c4bb6c36c680b13023.r2.dev/{file_name}"
+            print(url)
+            urls.append(url)
+
+        # trainModel(urls)
+        
+    except Exception as e:
+        return {"error": str(e)}
+        
+def get_timestamp():
+    current_time = datetime.now()
+    return current_time.strftime('%Y%m%d%H%M%S')
+
+
+def uploadfile(images):
+    s3_client = boto3.client(service_name='s3',
+                             endpoint_url=CLOUDFLARE_ENDPONT_URL,
+                             aws_access_key_id=CLOUDFLARE_AWS_ACCESS_KEY_ID,
+                             aws_secret_access_key=CLOUDFLARE_AWS_SECRET_ACCESS_KEY,
+                             region_name='auto'
+                             )
+
+    job_id = f"{get_timestamp()}{secrets.token_urlsafe(nbytes=6)}"
+    list_object(job_id)
+
+    try:
+        for i, image in enumerate(images):
+            # Convert PIL Image to bytes-like object
+            with BytesIO() as buffer:
+                image.save(buffer, format='JPEG')
+                buffer.seek(0)
+                response = s3_client.upload_fileobj(buffer, job_id, str(i))
+
+        return job_id
+    except Exception as e:
+        print("Error:", e)
+        return False
 
 
 generate_image_from_prompt()
