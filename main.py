@@ -7,6 +7,7 @@ import boto3
 from datetime import datetime
 import secrets
 from io import BytesIO  # Import BytesIO
+import configfile
 
 
 def read_input():
@@ -52,8 +53,8 @@ def list_object(prefix):
         s3_client = boto3.client(
             service_name='s3',
             endpoint_url="https://36be2b889dd21fc22f59d8342ea695fe.r2.cloudflarestorage.com/",
-            aws_access_key_id=CLOUDFLARE_AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=CLOUDFLARE_AWS_SECRET_ACCESS_KEY,
+            aws_access_key_id=configfile.CLOUDFLARE_AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=configfile.CLOUDFLARE_AWS_SECRET_ACCESS_KEY,
             
         )
         res = s3_client.list_objects(Bucket="photostudio", Prefix=prefix)
