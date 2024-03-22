@@ -7,7 +7,7 @@ import boto3
 from datetime import datetime
 import secrets
 from io import BytesIO  # Import BytesIO
-import settings
+import Settings from settings
 
 
 def read_input():
