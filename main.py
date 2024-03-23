@@ -12,6 +12,7 @@ from io import BytesIO
 def read_input():
     parser = argparse.ArgumentParser(description='Description of your program')
     parser.add_argument('--prompt', type=str, help='Description of parameter 1')
+    parser.add_argument('--job_id', type=str, help='Description of parameter 1')
     parser.add_argument('--negative_prompt', type=str,default='', help='Description of parameter 2 (optional)')
     parser.add_argument('--model', type=str,default='', help='Description of parameter 2 (optional)')
     return parser.parse_args()
@@ -37,9 +38,8 @@ def generate_image_from_prompt():
     images[0].save('/home/inference/outputs.jpg')
 
     # Upload image to Cloudflare
-    job_id = uploadfile(images)
+    job_id = uploadfile(images,request.job_id)
     if job_id:
-          print("Image uploaded successfully to Cloudflare. Job ID:")
           print(f"https://pub-b98e7fd0839f42c4bb6c36c680b13023.r2.dev/{job_id}/0")
         
     else:
@@ -74,12 +74,9 @@ def list_object(prefix):
     except Exception as e:
         return {"error": str(e)}
         
-def get_timestamp():
-    current_time = datetime.now()
-    return current_time.strftime('%Y%m%d%H%M%S')
 
 
-def uploadfile(images):
+def uploadfile(images,job_id):
     s3_client = boto3.client(service_name='s3',
                              endpoint_url=Settings.CLOUDFLARE_ENDPONT_URL,
                              aws_access_key_id=Settings.CLOUDFLARE_AWS_ACCESS_KEY_ID,
@@ -87,7 +84,6 @@ def uploadfile(images):
                              region_name='auto'
                              )
 
-    job_id = f"{get_timestamp()}{secrets.token_urlsafe(nbytes=6)}"
     list_object(job_id)
 
     try:
