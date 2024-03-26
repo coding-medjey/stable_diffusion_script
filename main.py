@@ -13,8 +13,11 @@ def read_input():
     parser = argparse.ArgumentParser(description='Description of your program')
     parser.add_argument('--prompt', type=str, help='Description of parameter 1')
     parser.add_argument('--job_id', type=str, help='Description of parameter 1')
+    parser.add_argument('--num_imgs', type=int,default=1, help='Description of parameter 2 (optional)')
     parser.add_argument('--negative_prompt', type=str,default='', help='Description of parameter 2 (optional)')
     parser.add_argument('--model', type=str,default='', help='Description of parameter 2 (optional)')
+    parser.add_argument('--height', type=int,default=1024, help='Description of parameter 2 (optional)')
+    parser.add_argument('--width', type=int,default=1024, help='Description of parameter 2 (optional)')
     return parser.parse_args()
 
 
@@ -30,12 +33,11 @@ def generate_image_from_prompt():
     images = pipeline(
         prompt=request.prompt,
         negative_prompt=request.negative_prompt,
-        height=1024,
-        width=1024
+        num_images_per_prompt=request.num_imgs,
+        height=request.height,
+        width=request.width
     ).images
 
-    # Save and display image
-    images[0].save('/home/inference/outputs.jpg')
 
     # Upload image to Cloudflare
     job_id = uploadfile(images,request.job_id)
