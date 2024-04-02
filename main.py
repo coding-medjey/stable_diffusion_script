@@ -8,6 +8,8 @@ import secrets
 from datetime import datetime
 from settings import Settings 
 from io import BytesIO
+import os
+import requests
 
 def read_input():
     parser = argparse.ArgumentParser(description='Description of your program')
@@ -20,15 +22,26 @@ def read_input():
     parser.add_argument('--width', type=int,default=1024, help='Description of parameter 2 (optional)')
     return parser.parse_args()
 
+def download_weights_if_not_exists(weights_url, save_path):
+    if not os.path.exists(save_path):
+        response = requests.get(weights_url)
+        with open(save_path, 'wb') as f:
+            f.write(response.content)
 
 def load_pipeline(model):
     pipeline = AutoPipelineForText2Image.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16).to("cuda")
-       # Load weights
-   # Load weights
+    
+    # Define weights URL and local path
     weights_url = "https://725ea4c6d70f1.notebooksa.jarvislabs.net/prav_r128_sdxl.safetensors"
+    weights_path = "/home/prav_r128_sdxl.safetensors"  
+    
+    # Download weights if not already downloaded
+    download_weights_if_not_exists(weights_url, weights_path)
+    
+    # Load weights
     pipeline.load_lora_weights(
-        weights_url,
-        weight_name="",  # You can specify the weight name if necessary
+        weights_path,
+        weight_name="",  
         adapter_name="man"
     )
     return pipeline
