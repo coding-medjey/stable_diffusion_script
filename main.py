@@ -58,7 +58,6 @@ def generate_image_from_prompt():
         
 
 def list_object(prefix):
-    print("i m in listing ")
     try:
         s3_client = boto3.client(
             service_name='s3',
