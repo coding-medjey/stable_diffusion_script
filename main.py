@@ -46,7 +46,7 @@ def generate_image_from_prompt():
         num_images_per_prompt=request.num_imgs,
         height=request.height,
         width=request.width,
-        seed=args.seed
+        seed=request.seed
     ).images
 
 
