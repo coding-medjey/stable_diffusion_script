@@ -19,6 +19,7 @@ def read_input():
     parser.add_argument('--model', type=str,default='', help='Description of parameter 2 (optional)')
     parser.add_argument('--height', type=int,default=1024, help='Description of parameter 2 (optional)')
     parser.add_argument('--width', type=int,default=1024, help='Description of parameter 2 (optional)')
+    parser.add_argument('--seed', help='Description of parameter 2 (optional)')
     return parser.parse_args()
 
 
@@ -44,7 +45,8 @@ def generate_image_from_prompt():
         negative_prompt=request.negative_prompt,
         num_images_per_prompt=request.num_imgs,
         height=request.height,
-        width=request.width
+        width=request.width,
+        seed=args.seed
     ).images
 
 
