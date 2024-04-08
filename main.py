@@ -29,7 +29,7 @@ def load_pipeline(model):
     # Load weights
     pipeline.load_lora_weights(
         "/home/",
-        weight_name="prav_r128_sdxl.safetensors",
+        weight_name=model,
         adapter_name="man"
     )
     return pipeline
