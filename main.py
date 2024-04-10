@@ -54,9 +54,9 @@ def generate_image_from_prompt():
     job_id = uploadfile(images,request.job_id)
     if job_id:
           print(f"https://pub-b98e7fd0839f42c4bb6c36c680b13023.r2.dev/{job_id}/0")
-        
-    else:
-        print("Failed to upload image to Cloudflare.")
+          
+    else: 
+          return False
         
 
 def list_object(prefix):
